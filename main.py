@@ -1,8 +1,9 @@
+"""ChainBoard scoreboard controlling app."""
+
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.lang import Builder
 from kivy.clock import Clock
@@ -11,30 +12,34 @@ from kivy.uix.bubble import Bubble, BubbleButton
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
-from kivy.utils import get_color_from_hex
 from kivy.core.window import Window
-from kivy.properties import NumericProperty
 from kivymd.theming import ThemeManager
 from kivymd.dialog import MDDialog
-from kivymd.label import MDLabel
 from kivymd.textfields import MDTextField
-from kivymd.button import MDRaisedButton
 from kivymd.material_resources import DEVICE_TYPE
-from kivymd.list import OneLineListItem, OneLineIconListItem
+from kivymd.list import OneLineIconListItem
 import argparse
 from threading import Thread
-from miscui import ScoreSpinner, RootFinderMixin, AvatarSampleWidget
-#import csv
+from miscui import RootFinderMixin, AvatarSampleWidget
 import texttable
-from jnius import JavaException, autoclass
+try:
+    from jnius import JavaException, autoclass
+    _JAVA = True
+except Exception:
+    # well, just ignore if on a PC
+    _JAVA = False
+    pass
 from util.prefmgr import PrefsMgr
-from util.saferequests import safe_post, safe_get, is_connection_error_exception
+from util.saferequests import (safe_post, safe_get,
+                               is_connection_error_exception)
 import os
 import re
 import requests
+import csv
 
 CONFIGURATION_PATH = 'config'
 PREFERENCES = 'prefs.json'
+
 
 class PanelUpdater(Thread):
 
@@ -889,17 +894,16 @@ class RootWidget(FloatLayout):
 
         self._unformatted_address = address
         self.scoreboard_address = 'http://{}'.format(address)
-        #self.scoreboard_address = 'http://{}:{}'.format(self.ids['scorebrdip'].text,
-        #                                                self.ids['scorebrdport'].text)
 
     def get_persist_data(self, uuid):
         return
-        #retrieve CSV data from game persistance
+        # retrieve CSV data from game persistance
         persist_url = self.scoreboard_address + '/persist/dump_range/{},1'.format(uuid)
 
         csv_data = None
         with requests.Session() as sess:
-            fmt = sess.get(self.scoreboard_address + '/persist/dump_fmt').json()
+            fmt = sess.get(self.scoreboard_address +
+                           '/persist/dump_fmt').json()
             data = sess.get(persist_url)
             decoded_data = data.content.decode('utf-8')
 
@@ -913,14 +917,13 @@ class RootWidget(FloatLayout):
             position = 0
             current_section = None
             section_position = -1
-            section_ended = True
             for line in csv_data:
                 if current_section is not None:
                     current_fmt = fmt['sections'][current_section]
                 if len(line) == 1:
                     if line[0] in fmt['sections']:
 
-                        #section length check
+                        # section length check
                         if section_position > -1 and section_position <\
                            current_fmt['min_length']:
                             print ('Section is too short')
@@ -930,20 +933,20 @@ class RootWidget(FloatLayout):
                         current_section = line[0]
                         section_position = 0
                         position += 1
-                        #create table
+                        # create table
                         tables[line[0]] = texttable.Texttable()
                         continue
                     else:
                         print ('Illegal section: {}'.format(line[0]))
                 else:
                     if section_position > -1:
-                        #inside section
+                        # inside section
                         if section_position == 0:
-                            #section headers
+                            # section headers
                             print ('found section "{}"'
                                    ' headers: {}'.format(current_section,
                                                          line))
-                            #insert into table
+                            # insert into table
                             tables[current_section].add_row(line)
                             if current_fmt['max_length'] == 1:
                                 section_position = -1
@@ -955,7 +958,7 @@ class RootWidget(FloatLayout):
                             continue
                         else:
                             current_fmt = fmt['sections'][current_section]
-                            #add more
+                            # add more
                             tables[current_section].add_row(line)
                             if section_position < current_fmt['max_length']:
                                 section_position += 1
@@ -966,9 +969,6 @@ class RootWidget(FloatLayout):
 
                             continue
 
-            #self.ids['persistshow'].text = csv_data.replace(',', '\t')
-            #table = texttable.Texttable()
-            #table.add_rows(csv_data)
             one_big_label = ''
             for section, table in tables.items():
                 if table is not None:
@@ -976,6 +976,7 @@ class RootWidget(FloatLayout):
                     if table_draw is not None:
                         one_big_label += table.draw()
             self.ids['persistshow'].text = one_big_label
+
 
 class SimpleboardDebugPanel(App):
 
@@ -1011,7 +1012,7 @@ class SimpleboardDebugPanel(App):
         if name == 'Chainball Scoreboard':
             Logger.info('discover: found scoreboard at {}:{}'.format(address,
                                                                      port))
-            #set address
+            # set address
             self.root.set_discovered_address('{}:{}'.format(address, port))
             if self.root._prefmgr.network__enable_discovery:
                 self.root.set_scoreboard_address('{}:{}'.format(address, port))
@@ -1020,17 +1021,19 @@ class SimpleboardDebugPanel(App):
         if name == 'Chainball Scoreboard':
             Logger.info('discover: scoreboard service was removed')
 
-            #unset address
+            # unset address
             self.root.set_discovered_address(None)
 
     def build(self):
         if self.listener is not None:
             self.listener.start_listening()
 
-        Logger.info('cb_Debug: window size dp = {},{}'.format(dp(Window.width),
-                                                              dp(Window.height)))
-        Logger.info('cb_Debug: window size  = {},{}'.format(Window.width,
-                                                            Window.height))
+        Logger.info('cb_Debug: window size dp = {},{}'
+                    .format(dp(Window.width),
+                            dp(Window.height)))
+        Logger.info('cb_Debug: window size  = {},{}'
+                    .format(Window.width,
+                            Window.height))
         return self.root
 
 
@@ -1044,28 +1047,30 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     Builder.load_file('panel.kv')
-    panel = SimpleboardDebugPanel(address='http://{}:{}'.format(args.address, args.port))
+    panel = SimpleboardDebugPanel(address='http://{}:{}'.format(args.address,
+                                                                args.port))
 
-    #detect platform
+    # detect platform
     listener = None
     is_android = False
-    try:
-        Context = autoclass('android.content.Context')
-        from discover.android import AndroidListener
-        Logger.info('Android detected')
-        listener = AndroidListener('_http_tcp',
-                                   Context,
-                                   panel.discover_service,
-                                   panel.remove_service)
-        is_android=True
-        Clock.schedule_interval(listener.discover_loop, 0.1)
-    except JavaException:
-        Logger.info('basic platform detected')
-        from discover.linux import LinuxListener
-        listener = LinuxListener('_http._tcp.local.',
-                                 service_found_cb=panel.discover_service,
-                                 service_removed_cb=panel.remove_service)
-        #listener.start_listening()
+    if _JAVA is True:
+        try:
+            Context = autoclass('android.content.Context')
+            from discover.android import AndroidListener
+            Logger.info('Android detected')
+            listener = AndroidListener('_http_tcp',
+                                       Context,
+                                       panel.discover_service,
+                                       panel.remove_service)
+            is_android = True
+            Clock.schedule_interval(listener.discover_loop, 0.1)
+        except JavaException:
+            Logger.info('basic platform detected')
+            from discover.linux import LinuxListener
+            listener = LinuxListener('_http._tcp.local.',
+                                     service_found_cb=panel.discover_service,
+                                     service_removed_cb=panel.remove_service)
+            # listener.start_listening()
 
     if listener is not None:
         panel.set_listener(listener, is_android=is_android)
