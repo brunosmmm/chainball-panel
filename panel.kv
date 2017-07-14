@@ -1,0 +1,542 @@
+#:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
+#:import MDBottomNavigationItem kivymd.tabs.MDBottomNavigationItem
+#:import MDAccordion kivymd.accordion.MDAccordion
+#:import MDAccordionItem kivymd.accordion.MDAccordionItem
+#:import MDAccordionSubItem kivymd.accordion.MDAccordionSubItem
+#:import OneLineListItem kivymd.list.OneLineListItem
+#:import TwoLineListItem kivymd.list.TwoLineListItem
+#:import IconRightSampleWidget miscui.IconRightSampleWidget
+#:import Toolbar kivymd.toolbar.Toolbar
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import MDTextField kivymd.textfields.MDTextField
+#:import ScoreButton miscui.ScoreButton
+#:import MDAccordionIconSubItem miscui.MDAccordionIconSubItem
+#:import NavigationDrawerDivider kivymd.navigationdrawer.NavigationDrawerDivider
+#:import MDAccordionSubItem2 miscui.MDAccordionSubItem2
+#:import MDAltRaisedButton miscui.MDAltRaisedButton
+
+
+<RootWidget>:
+    disabled: False
+    BoxLayout:
+        orientation: 'vertical'
+        Toolbar:
+            id: maintoolbar
+            title: 'ChainBoard'
+            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+            height: dp(40)
+            background_pallete: 'Teal'
+            background_hue: '500'
+        MDBottomNavigation:
+            do_default_tab: False
+            MDBottomNavigationItem:
+                name: 'gameControl'
+                text: 'Game Control'
+                icon: 'remote'
+                BoxLayout:
+                    id: gamectrltab
+
+                    MDAccordion:
+                        orientation: 'vertical'
+                        size_hint_x: 0.2
+                        id: gameActionsMenu
+                        MDAccordionItem:
+                            title: 'Game Actions'
+                            id: gameActItem
+                            icon: 'tennis'
+                            MDAccordionSubItem:
+                                text: 'Start Game'
+                                id: gameActStart
+                                icon: 'play'
+                                on_press: root.do_start_game()
+                            MDAccordionSubItem:
+                                text: 'Stop Game'
+                                id: gameActStop
+                                icon: 'stop'
+                                on_press: root.do_end_game()
+                            MDAccordionSubItem:
+                                text: 'Pause Game'
+                                id: gameActPause
+                                on_press: root.do_pause_unpause()
+                                #AvatarSampleWidget:
+                                #    icon: 'pause'
+                        MDAccordionItem:
+                            id: gameSetupItem
+                            title: 'Game Setup'
+                            icon: 'settings'
+                            MDAccordionSubItem:
+                                id: gameOverridePairing
+                                text: 'Override Pairing'
+                                on_press: root.force_pairing()
+                            MDAccordionSubItem:
+                                text: 'Remove Players'
+                                id: gameSetupRmAll
+                                on_press: root.do_remove_all()
+                            MDAccordionSubItem:
+                                id: gameAssignId
+                                text: 'Assign Identifier'
+                                on_press: root.assign_game_id_dialog()
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        id: gameControlPanel
+                        Toolbar:
+                            height: dp(40)
+                            size_hint_y: None
+                            id: gameStatusBar
+                            title: 'Game Identifier: {internal} [{user}] {state}'
+                            md_bg_color: get_color_from_hex(colors['Amber']['700'])
+                            background_pallete: 'Amber'
+                            background_hue: '700'
+
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            padding: dp(8)
+                            size_hint_y: 0.1
+                            MDLabel:
+                                id: remainingTime
+                                text: 'Remaining Time'
+                                font_style: 'Display2'
+                                halign: 'left'
+                            MDLabel:
+                                id: timerlabel
+                                font_style: 'Display2'
+                                text: '00:00'
+                                halign: 'right'
+                        NavigationDrawerDivider:
+
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            padding: dp(16)
+                            size_hint_y: 0.9
+                            BoxLayout:
+                                id: playerListBox
+                                orientation: 'vertical'
+                                size_hint_x: 0.2
+                                spacing: dp(20)
+                                MDLabel:
+                                    id: playerColLabel
+                                    font_style: 'Title'
+                                    text: 'Player'
+                                    halign: 'left'
+                                    size_hint_y: 0.0125
+                                BoxLayout:
+                                    orientation: 'vertical'
+                                    size_hint_y: 0.9875
+                                    spacing: dp(64)
+                                    id: playerSelButtons
+                                    BoxLayout:
+                                        MDRaisedButton:
+                                            id: pname0
+                                            #markup: True
+                                            text: ''
+                                            on_press: root.handle_player_button(0)
+                                    BoxLayout:
+                                        MDRaisedButton:
+                                            id: pname1
+                                            text: ''
+                                            on_press: root.handle_player_button(1)
+                                    BoxLayout:
+                                        MDRaisedButton:
+                                            id: pname2
+                                            text: ''
+                                            on_press: root.handle_player_button(2)
+                                    BoxLayout:
+                                        MDRaisedButton:
+                                            id: pname3
+                                            text: ''
+                                            on_press: root.handle_player_button(3)
+                            BoxLayout:
+                                id: playerScoreBox
+                                orientation: 'vertical'
+                                size_hint_x : 0.2
+                                spacing: dp(20)
+                                MDLabel:
+                                    id: playerScoreLabel
+                                    font_style: 'Title'
+                                    text: 'Score'
+                                    halign: 'left'
+                                    size_hint_y: 0.0125
+                                BoxLayout:
+                                    orientation: 'vertical'
+                                    size_hint_y: 0.9875
+                                    spacing: dp(64)
+                                    id: playerScoreButtons
+                                    BoxLayout:
+                                        ScoreButton:
+                                            id: pscore0
+                                            player: 0
+                                            disabled: True
+                                    BoxLayout:
+                                        ScoreButton:
+                                            id: pscore1
+                                            player: 1
+                                            disabled: True
+                                    BoxLayout:
+                                        ScoreButton:
+                                            id: pscore2
+                                            player: 2
+                                            disabled: True
+                                    BoxLayout:
+                                        ScoreButton:
+                                            id: pscore3
+                                            player: 3
+                                            disabled: True
+                            BoxLayout:
+                                orientation: 'vertical'
+                                id: playerCtlBox
+                                size_hint_x: 0.2
+                                spacing: dp(20)
+                                MDLabel:
+                                    id: playerCtlLabel
+                                    font_style: 'Title'
+                                    text: 'Indirect Control'
+                                    halign: 'left'
+                                    size_hint_y: 0.0125
+                                BoxLayout:
+                                    orientation: 'vertical'
+                                    size_hint_y: 0.9875
+                                    spacing: dp(64)
+                                    id: playerCtlButtons
+                                    BoxLayout:
+                                        spacing: dp(5)
+                                        orientation: 'horizontal'
+                                        id: pindirect0
+                                        MDIconButton:
+                                            icon: 'plus'
+                                            id: pIncr0
+                                            on_press: root.do_incr_score(0)
+                                        MDIconButton:
+                                            icon: 'minus'
+                                            id: pDecr0
+                                            on_press: root.do_decr_score(0)
+                                        MDIconButton:
+                                            icon: 'skip-next'
+                                            id: pSkip0
+                                            on_press: root.do_force_serve(0)
+                                    BoxLayout:
+                                        spacing: dp(5)
+                                        orientation: 'horizontal'
+                                        id: pindirect1
+                                        MDIconButton:
+                                            icon: 'plus'
+                                            id: pIncr1
+                                            on_press: root.do_incr_score(1)
+                                        MDIconButton:
+                                            icon: 'minus'
+                                            id: pDecr1
+                                            on_press: root.do_decr_score(1)
+                                        MDIconButton:
+                                            icon: 'skip-next'
+                                            id: pSkip1
+                                            on_press: root.do_force_serve(1)
+                                    BoxLayout:
+                                        spacing: dp(5)
+                                        orientation: 'horizontal'
+                                        id: pindirect2
+                                        MDIconButton:
+                                            icon: 'plus'
+                                            id: pIncr2
+                                            on_press: root.do_incr_score(2)
+                                        MDIconButton:
+                                            icon: 'minus'
+                                            id: pDecr2
+                                            on_press: root.do_decr_score(2)
+                                        MDIconButton:
+                                            icon: 'skip-next'
+                                            id: pSkip2
+                                            on_press: root.do_force_serve(2)
+                                    BoxLayout:
+                                        spacing: dp(5)
+                                        orientation: 'horizontal'
+                                        id: pindirect3
+                                        MDIconButton:
+                                            icon: 'plus'
+                                            id: pIncr3
+                                            on_press: root.do_incr_score(3)
+                                        MDIconButton:
+                                            icon: 'minus'
+                                            id: pDecr3
+                                            on_press: root.do_decr_score(3)
+                                        MDIconButton:
+                                            icon: 'skip-next'
+                                            id: pSkip3
+                                            on_press: root.do_force_serve(3)
+                            BoxLayout:
+                                orientation: 'vertical'
+                                id: playerEvtBox
+                                size_hint_x: 0.4
+                                spacing: dp(20)
+                                MDLabel:
+                                    id: playerEvtLabel
+                                    text: 'Referee Tools'
+                                    font_style: 'Title'
+                                    size_hint_y: 0.0125
+                                BoxLayout:
+                                    orientation: 'vertical'
+                                    size_hint_y: 0.9875
+                                    GridLayout:
+                                        cols: 4
+                                        id: preferee0
+                                        spacing: dp(20)
+                                        MDAltRaisedButton:
+                                            text: 'DF'
+                                            id: refBtn_0_0
+                                            md_bg_color: get_color_from_hex(colors['Red']['500'])
+                                            on_press: root.register_scoring_event('doublefault', 0)
+                                        MDAltRaisedButton:
+                                            text: 'SM'
+                                            id: refBtn_0_1
+                                            md_bg_color: get_color_from_hex(colors['Red']['500'])
+                                            on_press: root.register_scoring_event('sailormoon', 0)
+                                        MDAltRaisedButton:
+                                            text: 'SH'
+                                            id: refBtn_0_2
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('ratmeat', 0)
+                                        MDAltRaisedButton:
+                                            text: 'MS'
+                                            id: refBtn_0_3
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('mudskipper', 0)
+                                        MDAltRaisedButton:
+                                            text: 'SP'
+                                            id: refBtn_0_4
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('slowpoke', 0)
+                                        MDAltRaisedButton:
+                                            text: 'DB'
+                                            id: refBtn_0_5
+                                            on_press: root.register_scoring_event('deadball', 0)
+                                        MDAltRaisedButton:
+                                            text: 'CB'
+                                            id: refBtn_0_6
+                                            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+                                            on_press: root.register_scoring_event('chainball', 0)
+                                        MDAltRaisedButton:
+                                            text: 'JB'
+                                            id: refBtn_0_7
+                                            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+                                            on_press: root.register_scoring_event('jailbreak', 0)
+                                    GridLayout:
+                                        cols: 4
+                                        id: preferee1
+                                        spacing: dp(20)
+                                        MDAltRaisedButton:
+                                            text: 'DF'
+                                            id: refBtn_1_0
+                                            md_bg_color: get_color_from_hex(colors['Red']['500'])
+                                            on_press: root.register_scoring_event('doublefault', 1)
+                                        MDAltRaisedButton:
+                                            text: 'SM'
+                                            id: refBtn_1_1
+                                            md_bg_color: get_color_from_hex(colors['Red']['500'])
+                                            on_press: root.register_scoring_event('sailormoon', 1)
+                                        MDAltRaisedButton:
+                                            text: 'SH'
+                                            id: refBtn_1_2
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('ratmeat', 1)
+                                        MDAltRaisedButton:
+                                            text: 'MS'
+                                            id: refBtn_1_3
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('mudskipper', 1)
+                                        MDAltRaisedButton:
+                                            text: 'SP'
+                                            id: refBtn_1_4
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('slowpoke', 1)
+                                        MDAltRaisedButton:
+                                            text: 'DB'
+                                            id: refBtn_1_5
+                                            on_press: root.register_scoring_event('deadball', 1)
+                                        MDAltRaisedButton:
+                                            text: 'CB'
+                                            id: refBtn_1_6
+                                            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+                                            on_press: root.register_scoring_event('chainball', 1)
+                                        MDAltRaisedButton:
+                                            text: 'JB'
+                                            id: refBtn_1_7
+                                            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+                                            on_press: root.register_scoring_event('jailbreak', 1)
+                                    GridLayout:
+                                        cols: 4
+                                        id: preferee2
+                                        spacing: dp(20)
+                                        MDAltRaisedButton:
+                                            text: 'DF'
+                                            id: refBtn_2_0
+                                            md_bg_color: get_color_from_hex(colors['Red']['500'])
+                                            on_press: root.register_scoring_event('doublefault', 2)
+                                        MDAltRaisedButton:
+                                            text: 'SM'
+                                            id: refBtn_2_1
+                                            md_bg_color: get_color_from_hex(colors['Red']['500'])
+                                            on_press: root.register_scoring_event('sailormoon', 2)
+                                        MDAltRaisedButton:
+                                            text: 'SH'
+                                            id: refBtn_2_2
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('ratmeat', 2)
+                                        MDAltRaisedButton:
+                                            text: 'MS'
+                                            id: refBtn_2_3
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('mudskipper', 2)
+                                        MDAltRaisedButton:
+                                            text: 'SP'
+                                            id: refBtn_2_4
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('slowpoke', 2)
+                                        MDAltRaisedButton:
+                                            text: 'DB'
+                                            id: refBtn_2_5
+                                            on_press: root.register_scoring_event('deadball', 2)
+                                        MDAltRaisedButton:
+                                            text: 'CB'
+                                            id: refBtn_2_6
+                                            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+                                            on_press: root.register_scoring_event('chainball', 2)
+                                        MDAltRaisedButton:
+                                            text: 'JB'
+                                            id: refBtn_2_7
+                                            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+                                            on_press: root.register_scoring_event('jailbreak', 2)
+                                    GridLayout:
+                                        cols: 4
+                                        id: preferee3
+                                        spacing: dp(20)
+                                        MDAltRaisedButton:
+                                            text: 'DF'
+                                            id: refBtn_3_0
+                                            md_bg_color: get_color_from_hex(colors['Red']['500'])
+                                            on_press: root.register_scoring_event('doublefault', 3)
+                                        MDAltRaisedButton:
+                                            text: 'SM'
+                                            id: refBtn_3_1
+                                            md_bg_color: get_color_from_hex(colors['Red']['500'])
+                                            on_press: root.register_scoring_event('sailormoon', 3)
+                                        MDAltRaisedButton:
+                                            text: 'SH'
+                                            id: refBtn_3_2
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('ratmeat', 3)
+                                        MDAltRaisedButton:
+                                            text: 'MS'
+                                            id: refBtn_3_3
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('mudskipper', 3)
+                                        MDAltRaisedButton:
+                                            text: 'SP'
+                                            id: refBtn_3_4
+                                            md_bg_color: get_color_from_hex(colors['Amber']['500'])
+                                            on_press: root.register_scoring_event('slowpoke', 3)
+                                        MDAltRaisedButton:
+                                            text: 'DB'
+                                            id: refBtn_3_5
+                                            on_press: root.register_scoring_event('deadball', 3)
+                                        MDAltRaisedButton:
+                                            text: 'CB'
+                                            id: refBtn_3_6
+                                            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+                                            on_press: root.register_scoring_event('chainball', 3)
+                                        MDAltRaisedButton:
+                                            text: 'JB'
+                                            id: refBtn_3_7
+                                            md_bg_color: get_color_from_hex(colors['Teal']['500'])
+                                            on_press: root.register_scoring_event('jailbreak', 3)
+
+            MDBottomNavigationItem:
+                name: 'gameSetup'
+                text: 'Game Setup'
+                icon: 'book'
+                id: gamesetuptab
+            MDBottomNavigationItem:
+                name: 'gameDebug'
+                text: 'Debug & Test'
+                icon: 'bug'
+                BoxLayout:
+                    id: debugtab
+                    orientation: 'horizontal'
+                    spacing: 10
+                    ScrollView:
+                        do_scroll_x: False
+                        MDList:
+                            id: debugTabActions
+                            OneLineListItem:
+                                text: 'Perform Score Array LED Tests'
+                                id: debugHeader1
+                                disabled: True
+                            OneLineListItem:
+                                text: 'Test Score Array 1'
+                                on_press: root.do_test_score_1()
+                            OneLineListItem:
+                                text: 'Test Score Array 2'
+                                on_press: root.do_test_score_2()
+                            OneLineListItem:
+                                text: 'Test Score Array 3'
+                                on_press: root.do_test_score_3()
+                            OneLineListItem:
+                                text: 'Test Score Array 4'
+                                on_press: root.do_test_score_4()
+                            OneLineListItem:
+                                text: 'Setup for debugging'
+                                id: debugHeader2
+                                disabled: True
+                            OneLineListItem:
+                                text: 'Setup game with 2 players'
+                                on_press: root.do_debug_setup2()
+                            OneLineListItem:
+                                text: 'Setup game with 4 players'
+                                on_press: root.do_debug_setup4()
+                            OneLineListItem:
+                                text: 'Perform Announcement'
+                                on_press: root.do_announce
+                            OneLineListItem:
+                                text: 'Play Sound Effects'
+                                id: debugHeader3
+                                disabled: True
+
+            MDBottomNavigationItem:
+                name: 'gamePersist'
+                text: 'Game history'
+                icon: 'clock'
+                BoxLayout:
+                    id: saveddatatab
+                    orientation: 'vertical'
+                    Spinner:
+                        id: gpersist
+                        disabled: True
+                        text: '-'
+                        size_hint_y: 0.1
+                        on_text: root.get_persist_data(self.text)
+                    MDLabel:
+                        id: persistshow
+                        disabled: True
+                        text: ''
+                        size_hint_y: 0.9
+
+            MDBottomNavigationItem:
+                name: 'gameBoard'
+                text: 'Setup'
+                icon: 'settings'
+                ScrollView:
+                    do_scroll_x: False
+                    MDList:
+                        id: 'setuplist'
+                        TwoLineAvatarIconListItem:
+                            text: 'Auto-discovery'
+                            secondary_text: 'Enable Scoreboard auto-discovery in network'
+                            AvatarSampleWidget:
+                                icon: 'magnify'
+                            IconRightSampleWidget:
+                                id: autoDiscoveryBox
+                                on_state: root._auto_discovery_changed()
+                        OneLineIconListItem:
+                            id: setAddressButton
+                            text: 'Set Scoreboard address'
+                            on_press: root.set_address_dialog()
+                            AvatarSampleWidget:
+                                icon: 'access-point-network'
