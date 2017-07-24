@@ -26,6 +26,7 @@ class SimpleboardDebugPanel(App):
     listener = None
 
     def __init__(self, *args, **kwargs):
+        """Initialize."""
         address = kwargs.pop('address')
         super(SimpleboardDebugPanel, self).__init__(*args, **kwargs)
         self._is_android = False
@@ -35,21 +36,26 @@ class SimpleboardDebugPanel(App):
                                enable_app_cb=self.enable_app_cb)
 
     def disable_app_cb(self, **kwargs):
+        """Disable app callback."""
         if self._is_android:
             self.listener.start_listening(**kwargs)
 
     def enable_app_cb(self, **kwargs):
+        """Enable app callback."""
         if self._is_android:
             self.listener.stop_listening(**kwargs)
 
     def set_listener(self, listener, is_android=False):
+        """Set listener."""
         self.listener = listener
         self._is_android = is_android
 
     def post_init(self):
+        """Run post-initialization tasks."""
         self.root.post_init()
 
     def discover_service(self, address, port, name, attr):
+        """Discover scoreboard service."""
         if name == 'Chainball Scoreboard':
             Logger.info('discover: found scoreboard at {}:{}'.format(address,
                                                                      port))
@@ -59,6 +65,7 @@ class SimpleboardDebugPanel(App):
                 self.root.set_scoreboard_address('{}:{}'.format(address, port))
 
     def remove_service(self, name):
+        """Remove service."""
         if name == 'Chainball Scoreboard':
             Logger.info('discover: scoreboard service was removed')
 
@@ -66,6 +73,7 @@ class SimpleboardDebugPanel(App):
             self.root.set_discovered_address(None)
 
     def build(self):
+        """Build application."""
         if self.listener is not None:
             self.listener.start_listening()
 
