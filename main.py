@@ -3,15 +3,12 @@
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.lang import Builder
 from kivy.clock import Clock
 from kivy.logger import Logger
-from kivy.uix.bubble import Bubble, BubbleButton
+
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.core.window import Window
 from kivymd.theming import ThemeManager
 from kivymd.dialog import MDDialog
@@ -20,7 +17,8 @@ from kivymd.material_resources import DEVICE_TYPE
 from kivymd.list import OneLineIconListItem
 import argparse
 from threading import Thread
-from miscui import RootFinderMixin, AvatarSampleWidget
+from miscui import AvatarSampleWidget
+from playeract import PlayerActions
 import texttable
 try:
     from jnius import JavaException, autoclass
@@ -180,93 +178,6 @@ class PanelUpdater(Thread):
                         '{:0>2d}'.format(json_data['seconds'])
             self.root.ids['timerlabel'].text = timer_txt
             self.root.scoreboard_update()
-
-
-class PlayerActions(Bubble, RootFinderMixin):
-
-    def __init__(self, *args, **kwargs):
-        super(PlayerActions, self).__init__(*args, **kwargs)
-
-        self.player = kwargs['player']
-        self.pos = kwargs['position']
-        self.size = kwargs['size']
-        self.is_paired = kwargs['is_paired']
-        self.game_paused = kwargs['is_paused']
-        self.scoreboard_address = kwargs['address']
-        self.size_hint = (None, None)
-
-        self.add_btn = BubbleButton(on_press=self.add_player,
-                                    text='Add player',
-                                    disabled=kwargs['is_registered'] or
-                                    kwargs['is_paused'])
-        self.rm_btn = BubbleButton(on_press=self.remove_player,
-                                   text='Remove player',
-                                   disabled=not kwargs['is_registered'] or
-                                   kwargs['is_paused'])
-        pair_txt = 'Unpair remote' if self.is_paired else 'Pair remote'
-        self.pair_btn = BubbleButton(on_press=self.pair_remote,
-                                     text=pair_txt,
-                                     disabled=not kwargs['is_registered'])
-        self.add_widget(self.add_btn)
-        self.add_widget(self.rm_btn)
-        self.add_widget(self.pair_btn)
-
-    def _register_player(self, *args):
-
-        panel_txt = self.ptxt.text
-        web_txt = self.wtxt.text
-        safe_post(self.scoreboard_address+'/control/pregister',
-                  data={'panelTxt ': panel_txt,
-                        'webTxt': web_txt})
-        # get status
-        # TODO: display failure dialog
-
-        # kill popup
-        self.popup.dismiss()
-
-    def _add_dismiss(self, *args):
-        del self.popup
-        del self.ptxt
-        del self.wtxt
-
-    def add_player(self, *args):
-        # build popup contents
-        box = BoxLayout(orientation='vertical', spacing=2)
-        box.add_widget(Label(text='Full player name:'))
-        self.wtxt = TextInput()
-        box.add_widget(self.wtxt)
-        box.add_widget(Label(text='Panel display name:'))
-        self.ptxt = TextInput()
-        box.add_widget(self.ptxt)
-
-        addbut = Button(text='Add',
-                        on_press=self._register_player)
-        box.add_widget(addbut)
-
-        # build popup and show
-        self.popup = Popup(title='Add player',
-                           content=box,
-                           size_hint=(0.4, 0.4),
-                           on_dismiss=self._add_dismiss)
-        self.find_root().kill_pbubb()
-        self.popup.open()
-
-    def remove_player(self, *args):
-        safe_post(self.scoreboard_address+'/control/punregister',
-                  data=('playerNumber={}'.format(self.player)))
-
-        self.find_root().kill_pbubb()
-
-    def pair_remote(self, *args):
-
-        if self.is_paired:
-            # unpair, easy
-            safe_post(self.scoreboard_address+'/control/runpair',
-                      data=('playerNumber={}'.format(self.player)))
-        else:
-            pass
-
-        self.find_root().kill_pbubb()
 
 
 class RootWidget(FloatLayout):
