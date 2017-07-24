@@ -122,7 +122,6 @@ if __name__ == "__main__":
             listener = LinuxListener('_http._tcp.local.',
                                      service_found_cb=panel.discover_service,
                                      service_removed_cb=panel.remove_service)
-            listener.start_listening()
 
     if listener is not None:
         panel.set_listener(listener, is_android=is_android)
