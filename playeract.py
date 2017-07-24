@@ -2,12 +2,28 @@
 
 from kivy.uix.bubble import Bubble, BubbleButton
 from miscui import RootFinderMixin
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.label import Label
 from util.saferequests import safe_post
-from kivy.uix.textinput import TextInput
-from kivy.uix.popup import Popup
+from kivymd.dialog import MDDialog
+from kivymd.textfields import MDTextField
+from kivymd.label import MDLabel
+
+from kivy.logger import Logger
+
+
+class UsefulDialog(MDDialog):
+    """Make MDDialog not be worthless."""
+
+    def __init__(self, **kwargs):
+        """Initialize."""
+        super().__init__(**kwargs)
+
+        self._container.orientation = 'vertical'
+        self._container.padding = (0, 10, 0, 10)
+        self._container.spacing = 20
+
+    def add_to_box(self, widget):
+        """Add stuff to internal boxlayout."""
+        self._container.add_widget(widget)
 
 
 class PlayerActions(Bubble, RootFinderMixin):
@@ -43,13 +59,31 @@ class PlayerActions(Bubble, RootFinderMixin):
 
     def _register_player(self, *args):
 
-        panel_txt = self.ptxt.text
-        web_txt = self.wtxt.text
-        safe_post(self.scoreboard_address+'/control/pregister',
-                  data={'panelTxt ': panel_txt,
-                        'webTxt': web_txt})
+        panel_txt = self.ptxt.text.strip(' ')
+        web_txt = self.wtxt.text.strip(' ')
+
+        if len(panel_txt) == 0:
+            Logger.warning('RegisterPlayer: empty text')
+            self.ptxt.helper_text = 'Cannot be empty'
+            self.ptxt.error = True
+            self.ptxt.helper_text_mode = 'persistent'
+            return
+        elif len(panel_txt) > 7:
+            Logger.warning('RegisterPlayer: text too big')
+            self.ptxt.helper_text = 'Text is too big'
+            self.ptxt.error = True
+            self.ptxt.helper_text_mode = 'persistent'
+            return
+
+        if len(web_txt) == 0:
+            web_txt = panel_txt
+
+        ret = safe_post(self.scoreboard_address + '/control/pregister',
+                        data={'panelTxt': panel_txt,
+                              'webTxt': web_txt})
         # get status
         # TODO: display failure dialog
+        Logger.info('PlayerRegister: {}'.format(ret))
 
         # kill popup
         self.popup.dismiss()
@@ -61,24 +95,22 @@ class PlayerActions(Bubble, RootFinderMixin):
 
     def add_player(self, *args):
         """Build popup contents to add."""
-        box = BoxLayout(orientation='vertical', spacing=2)
-        box.add_widget(Label(text='Full player name:'))
-        self.wtxt = TextInput()
-        box.add_widget(self.wtxt)
-        box.add_widget(Label(text='Panel display name:'))
-        self.ptxt = TextInput()
-        box.add_widget(self.ptxt)
-
-        addbut = Button(text='Add',
-                        on_press=self._register_player)
-        box.add_widget(addbut)
+        self.wtxt = MDTextField(hint_text='Full Player Name')
+        self.ptxt = MDTextField(hint_text='Panel Display Name',
+                                required=True)
+        self.ptxt.max_text_length = 7
 
         # build popup and show
-        self.popup = Popup(title='Add player',
-                           content=box,
-                           size_hint=(0.4, 0.4),
-                           on_dismiss=self._add_dismiss)
+        self.popup = UsefulDialog(title='Add player',
+                                  content=None,
+                                  size_hint=(0.5, 0.5),
+                                  auto_dismiss=True)
+        self.popup.add_to_box(MDLabel(text='Full Player Name'))
+        self.popup.add_to_box(self.wtxt)
+        self.popup.add_to_box(MDLabel(text='Panel Display Name'))
+        self.popup.add_to_box(self.ptxt)
         self.find_root().kill_pbubb()
+        self.popup.add_action_button("Add", action=self._register_player)
         self.popup.open()
 
     def remove_player(self, *args):
