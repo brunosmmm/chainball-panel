@@ -106,7 +106,7 @@ if __name__ == "__main__":
         try:
             Context = autoclass('android.content.Context')
             from discover.android import AndroidListener
-            Logger.info('Android detected')
+            Logger.info('Listener: Android detected')
             listener = AndroidListener('_http_tcp',
                                        Context,
                                        panel.discover_service,
@@ -114,14 +114,18 @@ if __name__ == "__main__":
             is_android = True
             Clock.schedule_interval(listener.discover_loop, 0.1)
         except JavaException:
-            Logger.info('basic platform detected')
+            pass
+
+    if _JAVA is False or is_android is False:
+            Logger.info('Listener: basic platform detected')
             from discover.linux import LinuxListener
             listener = LinuxListener('_http._tcp.local.',
                                      service_found_cb=panel.discover_service,
                                      service_removed_cb=panel.remove_service)
-            # listener.start_listening()
+            listener.start_listening()
 
     if listener is not None:
         panel.set_listener(listener, is_android=is_android)
+
     panel.post_init()
     panel.run()
