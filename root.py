@@ -27,6 +27,12 @@ CONFIGURATION_PATH = 'config'
 PREFERENCES = 'prefs.json'
 
 
+class ScoreboardException(Exception):
+    """Exception in scoreboard communication."""
+
+    pass
+
+
 class RootWidget(FloatLayout):
 
     def __init__(self, *args, **kwargs):
@@ -415,11 +421,15 @@ class RootWidget(FloatLayout):
             try:
                 response = r.data.json()
                 if response['status'] == 'error':
-                    raise Exception
-            except Exception:
-                print ('Could not setup successfully, returned: {}'
-                       .format(response['error']))
+                    raise ScoreboardException
+            except ScoreboardException:
+                Logger.error('Could not setup successfully, returned: {}'
+                             .format(response['error']))
                 continue
+            except Exception as ex:
+                Logger.error(f'DebugSetup: failed to perform debug setup with'
+                             f' {player_num} players, got "{ex}"')
+                return
 
             player_num = int(response['playerNum'])
 
