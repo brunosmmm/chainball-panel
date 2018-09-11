@@ -36,15 +36,19 @@ class PanelUpdater(Thread):
         else:
             try:
                 status = r.data.json()
+                success = True
             except Exception as ex:
                 # ignore
+                success = False
                 Logger.info('PanelUpdater: exception '
                             'caught while retriving data: {}'.format(repr(ex)))
-                return
 
         if self.root.disconnected:
             self.root.enable_app(from_thread=True)
             self.root.one_shot_refresh()
+        if success is False:
+            return
+
         self.disabled = False
 
         # first look at board status

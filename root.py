@@ -439,7 +439,7 @@ class RootWidget(FloatLayout):
 
     def force_pairing(self):
 
-        for p in range(0, self.player_num):
+        for p in range(0, 4):
             # force pairing
             safe_get(self.scoreboard_address +
                      '/debug/fpair/{},{}'.format(p, p+1))
@@ -592,7 +592,7 @@ class RootWidget(FloatLayout):
             bubpos.append(butpos[0] + butsize[0]/2 - bubsize[0]/2)
             bubpos.append(butpos[1] - butsize[1]/2 + bubsize[1])
 
-            is_registered = str(player) in self.registered_player_list.keys()
+            is_registered = str(player) in self.registered_player_list
             is_paired = False
             if is_registered:
                 rm_id = self.registered_player_list[str(player)]['remote_id']

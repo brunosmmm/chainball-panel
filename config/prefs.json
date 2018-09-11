@@ -1,6 +1,6 @@
 {
     "network": {
-        "enable_discovery": true,
+        "enable_discovery": false,
         "saved_address": "1.1.1.1",
         "saved_port": "80"
     }
