@@ -4,11 +4,11 @@ chardet==3.0.4
 docutils==0.13.1
 enum-compat==0.0.2
 idna==2.5
-jnius==1.1.0
+#jnius==1.1.0
 Cython==0.28.5
 Kivy==1.10.1
 git+https://github.com/kivy-garden/garden@master
-kivymd==0.1.2
+git+https://gitlab.com/kivymd/KivyMD.git@master
 netifaces==0.10.6
 pexpect==4.2.1
 ptyprocess==0.5.2
